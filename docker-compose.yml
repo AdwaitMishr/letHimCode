@@ -1,0 +1,10 @@
+name: lethimcode_db
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: waltuh
+      POSTGRES_PASSWORD: jesse
+      POSTGRES_DB: lethimcode_db
+    ports:
+      - "5432:5432"
