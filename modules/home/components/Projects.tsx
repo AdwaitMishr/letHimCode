@@ -1,0 +1,165 @@
+"use client"
+import React from 'react'
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import TextAreaAutoSize from "react-textarea-autosize";
+import { ArrowUpIcon, Loader2Icon, FlaskConical, Zap, ScrollText, Wind, Clapperboard, Music, Code2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import z from 'zod';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Form, FormField } from '@/components/ui/form';
+
+const formSchema = z.object({
+    content: z.string().min(1, "Content is required").max(300, "Content must be less than 300 characters"),
+    
+});
+
+export const ProjectTemplates = [
+  {
+    icon: FlaskConical,
+    title: "Heisenberg's Lab",
+    prompt: "Build a dark-mode inventory dashboard for a chemistry lab. Use a neon green and crystal blue color scheme. Include a 'Purity' gauge chart, a periodic table element selector, and a 'Distribution Map'. The font should be sharp and modern.",
+  },
+  {
+    icon: Zap,
+    title: "Saiyan Scouter",
+    prompt: "Create a fitness tracker app inspired by DBZ. The main screen is a 'Power Level' counter that rises as you log workouts. Include a 'Gravity Chamber' timer and a 'Senzu Bean' nutrition logger. Use a HUD-style layout with green text on a black background.",
+  },
+  {
+    icon: ScrollText,
+    title: "Ninja Mission Board",
+    prompt: "Design a task management board inspired by Naruto. Use a parchment paper texture background. Columns should be 'D-Rank' (To Do) to 'S-Rank' (Done). Add a 'Chakra' stamina bar in the sidebar and use orange and black accents for the UI.",
+  },
+  {
+    icon: Wind,
+    title: "The Four Nations",
+    prompt: "Build a travel blog landing page inspired by Avatar. Split the screen into four quadrants: Water (Ice), Earth (Green), Fire (Red), Air (Clouds). Hovering over a quadrant expands it. Use Asian-inspired typography and paper-texture cards.",
+  },
+  {
+    icon: Clapperboard,
+    title: "Netflicks Clone",
+    prompt: "Develop a streaming service homepage. Feature a massive hero video banner with a mute toggle. Below, show horizontal scrollable rows for 'Trending Now'. Use a pure black background, bright red brand accents, and card scale animations on hover.",
+  },
+  {
+    icon: Music,
+    title: "Vibeify Player",
+    prompt: "Create a modern music web player. It needs a sidebar for playlists and a sticky bottom player bar. The main view should have a gradient background that adapts to the album art. precise play/pause controls and a waveform visualization for the audio.",
+  },
+  {
+    icon: Code2,
+    title: "Portfolio Terminal",
+    prompt: "Build a developer portfolio that looks like a hacking terminal. The user types commands like 'help', 'about', or 'projects' to reveal content. Use a monospace font, a blinking cursor, and a matrix-style green phosphor text effect.",
+  }
+];
+
+type FormValues = z.infer<typeof formSchema>;
+
+const Projects = () => {
+
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
+    const form = useForm({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            content: '',
+        },
+    });
+
+    const handleTemplate = (prompt: string) => {
+        form.setValue("content", prompt);
+    }
+
+    const onSubmit = async(values : FormValues) => {
+        try {
+            console.log(values);
+            
+        } catch (error) {
+            
+        }
+    }
+
+  return (
+    <div className='space-y-6'>
+        <div className='grid grid-cols-1 sm:grids-cols-2 lg:grid-cols-4'>
+        {
+            ProjectTemplates.map((template, index) => (
+                <button
+                key={index}
+                onClick={() => handleTemplate(template.prompt)}
+                className='group relative p-4 rounded-xl border bg-card hover:bg-accent/50 transition-all duration-200 text-left 
+                disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md hover:border-primary/30'
+                >
+                  <div className='flex flex-col gap-2'>
+                   <span className='text-3xl' role='img' aria-label={template.title}>
+                    <template.icon />
+                   </span>
+                   <h3 className='text-sm font-medium group-hover:text-primary transition-colors'>
+                    {template.title}
+                   </h3>
+                  </div>
+                  <div className='absolute inset-0 rounded-xl bg-linear-to-br from-primary/5 to-transparent opacity-0  group-hover:opacity-100
+                  transition-opacity pointer-events-none'/>
+                </button>
+            ))
+        }
+        </div>
+        <div className='relative'>
+        <div className='absolute inset-0 flex items-center'>
+        <span className='w-full border-t' />
+        </div>
+        <div className='relative flex justify-center text-xs uppercase'> 
+          <span className='bg-background px2 text-muted-foreground'>
+            / Or Cook your Own Idea /
+          </span>
+        </div>
+        </div>
+        <Form {...form}>
+           <form onSubmit={form.handleSubmit(onSubmit)}
+           className={cn("relative border p-4 pt-1 rounded-xl bg-sidebar dark:bg-sidebar transition-all",
+            isLoading && "shadow-lg ring-2 ring-primary/20 ")}>
+            <FormField 
+            control={form.control}
+            name="content"
+            render={({field}) => (
+              <TextAreaAutoSize
+              {...field}
+              placeholder='Cook your idea here'
+              onFocus={() => setIsLoading(true)}
+              onBlur={() => setIsLoading(false)}
+              minRows={3}
+              maxRows={10}
+              className={cn('pt-4 resize-none border-none w-full outline-none bg-transparent')} 
+              onKeyDown={(e) => {
+                if(e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                  e.preventDefault();
+                  form.handleSubmit(onSubmit)(e);
+                }
+              }}
+              /> 
+            )}
+            />
+            <div className='flex gap-x-2 items-end justify-between pt-2'>
+            <div className='text-[10px] text-muted-foreground font-mono'>
+              <kbd className='ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded
+              border  bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground'>
+                <span>&#8984;</span>Enter
+                </kbd> 
+                &nbsp;to submit
+            </div>
+            <Button
+            className={cn('size-8 rounded-full')}
+            type='submit'>
+              <ArrowUpIcon className='size-4 '/>
+            </Button>
+            </div>
+           </form>
+        </Form>
+    </div>
+  )
+}
+
+export default Projects
