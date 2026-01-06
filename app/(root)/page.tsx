@@ -1,7 +1,6 @@
 import Projects from '@/modules/home/components/Projects'
 import Image from 'next/image'
 import React from 'react'
-
 import { WavyBackground } from '@/components/ui/wavy-background';
 
 const Page = () => {
@@ -13,6 +12,7 @@ const Page = () => {
         colors={['#388e3c', '#fbc02d', '#1a1a1a', '#43a047']}
         backgroundFill='#1a1a1a'
       >
+          
         <div className='flex flex-col items-center pt-24'>
           <Image
             src={"/Logo.svg"}
@@ -27,10 +27,11 @@ const Page = () => {
           Let Him Code with 99.1% purity while you go touch some grass.
         </p>
       </WavyBackground>
-
+        
       <div className='max-w-5xl w-full mx-auto px-4 py-12'>
         <Projects />
       </div>
+
     </div>
   )
 }

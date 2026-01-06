@@ -11,6 +11,7 @@ import z from 'zod';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
+import { invokeAIAgent } from '../actions';
 
 const formSchema = z.object({
     content: z.string().min(1, "Content is required").max(300, "Content must be less than 300 characters"),
@@ -81,9 +82,19 @@ const Projects = () => {
             
         }
     }
-
+    const onInvoke = async() => {
+      try {
+        const res = await invokeAIAgent()
+        console.log(res);
+        toast.success("AI Agent Invoked");
+      } catch (error) {
+       console.log(error);
+        toast.error("Failed to invoke AI Agent");
+      }
+    }
   return (
     <div className='space-y-6'>
+      <Button onClick={onInvoke} className='relative z-10'>Invoke AI agent </Button>
         <div className='grid grid-cols-1 sm:grids-cols-2 lg:grid-cols-4'>
         {
             ProjectTemplates.map((template, index) => (
