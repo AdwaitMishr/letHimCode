@@ -1,11 +1,10 @@
+// build.ts
 import { Template, defaultBuildLogger } from 'e2b'
-import { template } from './template'
+import { template as nextJSTemplate } from './template'
 
-async function main() {
-  await Template.build(template, {
-    alias: 'lethimcode-nextjs-dev',
-    onBuildLogs: defaultBuildLogger(),
-  });
-}
-
-main().catch(console.error);
+Template.build(nextJSTemplate, {
+  alias: 'lethimcode-nextjs',
+  cpuCount: 4,
+  memoryMB: 4096,
+  onBuildLogs: defaultBuildLogger(),
+})
