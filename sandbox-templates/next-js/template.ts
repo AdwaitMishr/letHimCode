@@ -1,16 +1,15 @@
-import { Template, waitForPort } from 'e2b'
+import { Template, waitForURL } from 'e2b'
 
 export const template = Template()
-  .fromNodeImage('24-slim')
-  .aptInstall('curl')
+  .fromBunImage('1.3')
   .setWorkdir('/home/user/nextjs-app')
   .runCmd(
-    'npx create-next-app@14.2.33 . --ts --tailwind --no-eslint --import-alias "@/*" --use-npm --no-app --no-src-dir',
+    'bun create next-app --app --ts --tailwind --turbopack --yes --use-bun .'
   )
-  .runCmd('npx shadcn@2.1.7 init -d')
-  .runCmd('npx shadcn@2.1.7 add --all')
+  .runCmd('bunx --bun shadcn@latest init -d')
+  .runCmd('bunx --bun shadcn@latest add --all')
   .runCmd(
-    'mv /home/user/nextjs-app/* /home/user/ && rm -rf /home/user/nextjs-app',
+    'mv /home/user/nextjs-app/* /home/user/ && rm -rf /home/user/nextjs-app'
   )
   .setWorkdir('/home/user')
-  .setStartCmd('npx next --turbo', waitForPort(3000))
+  .setStartCmd('bun --bun run dev --turbo', waitForURL('http://localhost:3000'))
