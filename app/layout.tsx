@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { dark, shadesOfPurple, neobrutalism } from "@clerk/themes";
+import { QueryProvider } from "@/components/query-provider";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -68,8 +69,10 @@ export default function RootLayout({
         enableSystem
         disableTransitionOnChange
         >
+      <QueryProvider>
+      <Toaster position="top-right" />
       {children}
-      <Toaster position="bottom-right" />
+      </QueryProvider>
       </ThemeProvider>
         
       </body>

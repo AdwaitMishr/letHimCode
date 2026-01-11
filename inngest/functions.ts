@@ -4,6 +4,8 @@ import { createAgent, gemini, createTool, createNetwork } from "@inngest/agent-k
 import Sandbox from "e2b"
 import z from "zod";
 import { lastAssistantTextMessageContent } from "./utils";
+import db from "@/lib/db";
+import { MessageRole, MessageType } from "@prisma/client";
 
 
 export const codeAgentFunction = inngest.createFunction(
@@ -17,7 +19,7 @@ export const codeAgentFunction = inngest.createFunction(
     })
 
   const codeAgent = createAgent({
-      name: "code-agent",
+      name: "codeAgent",
       description: "An expert coding agent",
       system: PROMPT,
       model: gemini({ model: "gemini-2.5-flash" }),
@@ -165,6 +167,37 @@ export const codeAgentFunction = inngest.createFunction(
 
     return `http://${host}`;
   })
+
+  await step.run("save-result", async() => {
+    if(isError) {
+      return await db.message.create({
+        data: {
+          projectId: event.data.projectId,
+          content: "Something went wrong. Please try again",
+          role: MessageRole.ASSISTANT,
+          type: MessageType.ERROR,
+        }
+      });
+    }
+
+    return await db.message.create({
+      data: {
+        projectId: event.data.projectId,
+        content: result.state.data.summary,
+        role: MessageRole.ASSISTANT,
+        type: MessageType.RESULT,
+        shards: {
+          create: {
+            sandboxUrl: sandboxUrl,
+            title: "NA",
+            files: result.state.data.files
+          }
+        }
+      }
+    });
+  });
+
+
 
   return {
       url:sandboxUrl,
