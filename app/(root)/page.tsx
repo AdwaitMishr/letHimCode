@@ -2,6 +2,7 @@ import Projects from '@/modules/home/components/Projects'
 import Image from 'next/image'
 import React from 'react'
 import { WavyBackground } from '@/components/ui/wavy-background';
+import  ProjectList  from "@/modules/home/components/ProjectList"
 
 const Page = () => {
   return (
@@ -31,7 +32,7 @@ const Page = () => {
       <div className='max-w-5xl w-full mx-auto px-4 py-12'>
         <Projects />
       </div>
-
+      <ProjectList />
     </div>
   )
 }

@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
 import { invokeAIAgent } from '../actions';
-import { useCreateProjects } from '@/modules/projects/hoooks/project';
+import { useCreateProjects } from '@/modules/projects/hooks/project';
 import { Spinner } from "@/components/ui/spinner"
 
 const formSchema = z.object({
