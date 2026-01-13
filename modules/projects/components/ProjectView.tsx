@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import ProjectHeader from './ProjectHeader';
-import MessageContainer from './MessageContainer';
+import MessageContainer from '../../messages/components/MessageContainer';
 import { Shard } from '@prisma/client';
 
 const ProjectView = ({projectId} : {projectId : string}) => {
