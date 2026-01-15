@@ -2,14 +2,17 @@
 import { cn } from "@/lib/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { createNoise3D } from "simplex-noise";
+import { useTheme } from "next-themes";
 
 export const WavyBackground = ({
   children,
   className,
   containerClassName,
   colors,
+  lightColors,
   waveWidth,
   backgroundFill,
+  lightBackgroundFill,
   blur = 10,
   speed = "fast",
   waveOpacity = 0.5,
@@ -19,14 +22,18 @@ export const WavyBackground = ({
   className?: string;
   containerClassName?: string;
   colors?: string[];
+  lightColors?: string[];
   waveWidth?: number;
   backgroundFill?: string;
+  lightBackgroundFill?: string;
   blur?: number;
   speed?: "slow" | "fast";
   waveOpacity?: number;
   [key: string]: any;
 }) => {
   const noise = createNoise3D();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   let w: number,
     h: number,
     nt: number,
@@ -61,13 +68,25 @@ export const WavyBackground = ({
     render();
   };
 
-  const waveColors = colors ?? [
+  const isLightTheme = mounted && resolvedTheme === 'light';
+
+  const darkWaveColors = colors ?? [
     "#38bdf8",
     "#818cf8",
     "#c084fc",
     "#e879f9",
     "#22d3ee",
   ];
+
+  const lightWaveColors = lightColors ?? [
+    "#4ade80",
+    "#fcd34d",
+    "#a3a3a3",
+    "#22c55e",
+  ];
+
+  const waveColors = isLightTheme ? lightWaveColors : darkWaveColors;
+  const currentBackgroundFill = isLightTheme ? (lightBackgroundFill || "#fafafa") : (backgroundFill || "black");
   const drawWave = (n: number) => {
     nt += getSpeed();
     for (i = 0; i < n; i++) {
@@ -85,7 +104,7 @@ export const WavyBackground = ({
 
   let animationId: number;
   const render = () => {
-    ctx.fillStyle = backgroundFill || "black";
+    ctx.fillStyle = currentBackgroundFill;
     ctx.globalAlpha = waveOpacity || 0.5;
     ctx.fillRect(0, 0, w, h);
     drawWave(5);
@@ -93,19 +112,24 @@ export const WavyBackground = ({
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     init();
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, []);
+  }, [mounted, resolvedTheme]);
 
   const [isSafari, setIsSafari] = useState(false);
   useEffect(() => {
     // I'm sorry but i have got to support it on safari.
     setIsSafari(
       typeof window !== "undefined" &&
-        navigator.userAgent.includes("Safari") &&
-        !navigator.userAgent.includes("Chrome")
+      navigator.userAgent.includes("Safari") &&
+      !navigator.userAgent.includes("Chrome")
     );
   }, []);
 

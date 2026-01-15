@@ -1,0 +1,49 @@
+"use client"
+
+import * as React from "react"
+import { useTheme } from "next-themes"
+import { Moon, Sun, Monitor } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export function ThemeToggle() {
+    const { setTheme, theme } = useTheme()
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-lg border border-white/10 bg-background/50 hover:bg-background/80 hover:border-primary/30 transition-all"
+                >
+                    <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500" />
+                    <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-emerald-400" />
+                    <span className="sr-only">Toggle theme</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-30">
+                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                    <DropdownMenuRadioItem value="light" className="gap-2">
+                        <Sun className="h-4 w-4 text-amber-500" />
+                        Light
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dark" className="gap-2">
+                        <Moon className="h-4 w-4 text-emerald-400" />
+                        Dark
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="system" className="gap-2">
+                        <Monitor className="h-4 w-4 text-muted-foreground" />
+                        System
+                    </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}

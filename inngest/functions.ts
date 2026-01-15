@@ -1,4 +1,4 @@
-import { PROMPT } from "@/prompt";
+import { PROMPT, RESPONSE_PROMPT, SHARD_TITLE_PROMPT } from "@/prompt";
 import { inngest } from "./client";
 import { createAgent, gemini, createTool, createNetwork } from "@inngest/agent-kit"
 import Sandbox from "e2b"
@@ -158,6 +158,47 @@ export const codeAgentFunction = inngest.createFunction(
 
    const result = await network.run(event.data.value)
 
+   const shardTitleGenerator = createAgent({
+    name:"shardTitleGenerator",
+    description:"Generate titles for the shards",
+    system:SHARD_TITLE_PROMPT,
+    model: gemini({ model: "gemini-2.5-flash" })
+   })
+
+   const responseGenerator = createAgent({
+    name:"responseGenerator",
+    description:"Generate response for the shards",
+    system:RESPONSE_PROMPT,
+    model: gemini({ model: "gemini-2.5-flash" })
+   })
+
+   const {output: shardTitleOutput} = await shardTitleGenerator.run(result.state.data.summary);
+   const {output: responseOutput} = await responseGenerator.run(result.state.data.summary);
+
+   const generateShardTitle = () => {
+    if(shardTitleOutput[0].type !== "text") {
+      return "NA";
+    }
+    if(Array.isArray(shardTitleOutput[0].content)) {
+      return shardTitleOutput[0].content.map((c) => c).join("");
+    }
+    else {
+      return shardTitleOutput[0].content;
+    }
+   }
+
+   const generateResponse = () => {
+    if(responseOutput[0].type !== "text") {
+      return "Here you go";
+    }
+    if(Array.isArray(responseOutput[0].content)) {
+      return responseOutput[0].content.map((c) => c).join("");
+    }
+    else {
+      return responseOutput[0].content;
+    }
+   }
+
    const isError = !result.state.data.summary ||  Object.keys(result.state.data.files || {}).length === 0;
 
 
@@ -189,7 +230,7 @@ export const codeAgentFunction = inngest.createFunction(
         shards: {
           create: {
             sandboxUrl: sandboxUrl,
-            title: "NA",
+            title: generateShardTitle(),
             files: result.state.data.files
           }
         }

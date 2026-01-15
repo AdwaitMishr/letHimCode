@@ -55,7 +55,6 @@ const AssistantMessage = ({
         alt='heisnberg'
         height={30}
         width={30}
-        className='invert dark:invert-0'
         />
         <span className="text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
           {format(new Date(createdAt), "HH:mm 'on' MMM dd, yyyy")}

@@ -28,7 +28,7 @@ const ProjectHeader = ({projectId} : {projectId : string}) => {
               alt="Hisenberg"
               width={28}
               height={28}
-              className="shrink-0 invert dark:invert-0"
+              className="shrink-0 "
             />
             <span className="text-sm font-medium">
               {isPending ? <Spinner /> : project?.name || "Untitled Project"}

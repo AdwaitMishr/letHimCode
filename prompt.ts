@@ -14,7 +14,7 @@ Based on the <task_summary> provided by the engineering agent:
 Do not mention "task_summary", "agents", or internal processes. Just speak directly to the user.
 `;
 
-export const FRAGMENT_TITLE_PROMPT = `
+export const SHARD_TITLE_PROMPT = `
 Generate a concise, high-impact title for the code fragment based on the <task_summary>.
 
 Rules:

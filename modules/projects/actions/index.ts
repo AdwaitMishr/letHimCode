@@ -61,3 +61,52 @@ export const getProjectById = async( projectId : string ) => {
     });
     return project;
 }
+
+export const deleteProject = async(projectId: string) => {
+    const user = await getCurrentUser();
+    if(!user) throw new Error("Unauthorized");
+
+    const project = await db.project.findUnique({
+        where: {
+            id: projectId,
+            userId: user.id,
+        },
+    });
+
+    if(!project) throw new Error("Project not found");
+
+    await db.project.delete({
+        where: {
+            id: projectId,
+            userId: user.id,
+        },
+    });
+
+    return { success: true };
+}
+
+export const updateProject = async(projectId: string, name: string) => {
+    const user = await getCurrentUser();
+    if(!user) throw new Error("Unauthorized");
+
+    const project = await db.project.findUnique({
+        where: {
+            id: projectId,
+            userId: user.id,
+        },
+    });
+
+    if(!project) throw new Error("Project not found");
+
+    const updatedProject = await db.project.update({
+        where: {
+            id: projectId,
+            userId: user.id,
+        },
+        data: {
+            name: name,
+        },
+    });
+
+    return updatedProject;
+}
