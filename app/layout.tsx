@@ -61,7 +61,7 @@ export default function RootLayout({
 
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${oswald.variable} ${chakraPetch.variable} antialiased`}
+        className={`${oswald.variable} ${chakraPetch.variable} font-chakra antialiased`}
       >
         <ThemeProvider
         attribute = "class"

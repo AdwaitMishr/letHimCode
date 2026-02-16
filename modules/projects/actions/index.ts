@@ -1,18 +1,21 @@
 "use server"
 import { inngest } from "@/inngest/client"
 import db from "@/lib/db"
+import { checkAndIncrementRateLimit } from "@/lib/rate-limit"
 import { getCurrentUser } from "@/modules/auth/actions"
 import { MessageRole, MessageType } from "@prisma/client"
-import { generateSlug }  from "random-word-slugs"
+import { generateSlug } from "random-word-slugs"
 
-export const createProject = async(value: string) => {
+export const createProject = async (value: string) => {
     const user = await getCurrentUser();
-    if(!user) throw new Error("Unauthorized");
+    if (!user) throw new Error("Unauthorized");
+
+    await checkAndIncrementRateLimit(user.id);
 
     const newProject = await db.project.create({
-        data : {
-            name: generateSlug(2, {format:"camel"}),
-            userId : user.id,
+        data: {
+            name: generateSlug(2, { format: "camel" }),
+            userId: user.id,
             messages: {
                 create: {
                     content: value,
@@ -24,7 +27,7 @@ export const createProject = async(value: string) => {
     })
 
     await inngest.send({
-        name:"codeAgent/run",
+        name: "codeAgent/run",
         data: {
             value: value,
             projectId: newProject.id
@@ -34,37 +37,37 @@ export const createProject = async(value: string) => {
     return newProject;
 }
 
-export const getProjects = async() => {
+export const getProjects = async () => {
     const user = await getCurrentUser();
-    if(!user) throw new Error("Unauthorized");
+    if (!user) throw new Error("Unauthorized");
 
     const project = await db.project.findMany({
         where: {
-            userId : user.id
+            userId: user.id
         },
         orderBy: {
-            createdAt : "desc"
+            createdAt: "desc"
         }
     });
     return project;
 }
 
-export const getProjectById = async( projectId : string ) => {
-     const user = await getCurrentUser();
-    if(!user) throw new Error("Unauthorized");
+export const getProjectById = async (projectId: string) => {
+    const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthorized");
 
     const project = await db.project.findUnique({
         where: {
             id: projectId,
-            userId : user.id,
+            userId: user.id,
         },
     });
     return project;
 }
 
-export const deleteProject = async(projectId: string) => {
+export const deleteProject = async (projectId: string) => {
     const user = await getCurrentUser();
-    if(!user) throw new Error("Unauthorized");
+    if (!user) throw new Error("Unauthorized");
 
     const project = await db.project.findUnique({
         where: {
@@ -73,7 +76,7 @@ export const deleteProject = async(projectId: string) => {
         },
     });
 
-    if(!project) throw new Error("Project not found");
+    if (!project) throw new Error("Project not found");
 
     await db.project.delete({
         where: {
@@ -85,9 +88,9 @@ export const deleteProject = async(projectId: string) => {
     return { success: true };
 }
 
-export const updateProject = async(projectId: string, name: string) => {
+export const updateProject = async (projectId: string, name: string) => {
     const user = await getCurrentUser();
-    if(!user) throw new Error("Unauthorized");
+    if (!user) throw new Error("Unauthorized");
 
     const project = await db.project.findUnique({
         where: {
@@ -96,7 +99,7 @@ export const updateProject = async(projectId: string, name: string) => {
         },
     });
 
-    if(!project) throw new Error("Project not found");
+    if (!project) throw new Error("Project not found");
 
     const updatedProject = await db.project.update({
         where: {

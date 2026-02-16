@@ -11,6 +11,8 @@ model User {
   email String @unique
   image String?
   clerkId String @unique
+  generationCount    Int       @default(0)
+  lastGenerationDate DateTime  @default(now())
   projects Project[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt 

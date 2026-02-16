@@ -13,12 +13,12 @@ export const codeAgentFunction = inngest.createFunction(
   { event: "codeAgent/run" },
   async ({ event, step }) => {
 
-    const sandboxId = await step.run("get-sandbox-id", async() => {
+    const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("letHimCode-nextjs")
       return sandbox.sandboxId;
     })
 
-  const codeAgent = createAgent({
+    const codeAgent = createAgent({
       name: "codeAgent",
       description: "An expert coding agent",
       system: PROMPT,
@@ -50,7 +50,7 @@ export const codeAgentFunction = inngest.createFunction(
 
                 return result.stdout;
               } catch (error) {
-                console.log(
+                console.error(
                   `Command failed: ${error} \n stdout: ${buffers.stdout}\n stderr: ${buffers.stderr}`
                 );
 
@@ -126,12 +126,12 @@ export const codeAgentFunction = inngest.createFunction(
           },
         }),
       ],
-       lifecycle:{
-        onResponse:async ({result , network})=>{
+      lifecycle: {
+        onResponse: async ({ result, network }) => {
           const lastAssistantMessageText = lastAssistantTextMessageContent(result as any);
 
-          if(lastAssistantMessageText && network){
-            if(lastAssistantMessageText.includes("<task_summary>")){
+          if (lastAssistantMessageText && network) {
+            if (lastAssistantMessageText.includes("<task_summary>")) {
               network.state.data.summary = lastAssistantMessageText
             }
           }
@@ -141,14 +141,14 @@ export const codeAgentFunction = inngest.createFunction(
       }
     });
     const network = createNetwork({
-      name:"coding-agent-network",
-      agents:[codeAgent],
-      maxIter:10,
-      
-      router:async ({network})=>{
+      name: "coding-agent-network",
+      agents: [codeAgent],
+      maxIter: 10,
+
+      router: async ({ network }) => {
         const summary = network.state.data.summary;
 
-        if(summary){
+        if (summary) {
           return
         }
 
@@ -156,96 +156,96 @@ export const codeAgentFunction = inngest.createFunction(
       }
     })
 
-   const result = await network.run(event.data.value)
+    const result = await network.run(event.data.value)
 
-   const shardTitleGenerator = createAgent({
-    name:"shardTitleGenerator",
-    description:"Generate titles for the shards",
-    system:SHARD_TITLE_PROMPT,
-    model: gemini({ model: "gemini-2.5-flash" })
-   })
+    const shardTitleGenerator = createAgent({
+      name: "shardTitleGenerator",
+      description: "Generate titles for the shards",
+      system: SHARD_TITLE_PROMPT,
+      model: gemini({ model: "gemini-2.5-flash" })
+    })
 
-   const responseGenerator = createAgent({
-    name:"responseGenerator",
-    description:"Generate response for the shards",
-    system:RESPONSE_PROMPT,
-    model: gemini({ model: "gemini-2.5-flash" })
-   })
+    const responseGenerator = createAgent({
+      name: "responseGenerator",
+      description: "Generate response for the shards",
+      system: RESPONSE_PROMPT,
+      model: gemini({ model: "gemini-2.5-flash" })
+    })
 
-   const {output: shardTitleOutput} = await shardTitleGenerator.run(result.state.data.summary);
-   const {output: responseOutput} = await responseGenerator.run(result.state.data.summary);
+    const { output: shardTitleOutput } = await shardTitleGenerator.run(result.state.data.summary);
+    const { output: responseOutput } = await responseGenerator.run(result.state.data.summary);
 
-   const generateShardTitle = () => {
-    if(shardTitleOutput[0].type !== "text") {
-      return "NA";
+    const generateShardTitle = () => {
+      if (shardTitleOutput[0].type !== "text") {
+        return "NA";
+      }
+      if (Array.isArray(shardTitleOutput[0].content)) {
+        return shardTitleOutput[0].content.map((c) => c).join("");
+      }
+      else {
+        return shardTitleOutput[0].content;
+      }
     }
-    if(Array.isArray(shardTitleOutput[0].content)) {
-      return shardTitleOutput[0].content.map((c) => c).join("");
+
+    const generateResponse = () => {
+      if (responseOutput[0].type !== "text") {
+        return "Here you go";
+      }
+      if (Array.isArray(responseOutput[0].content)) {
+        return responseOutput[0].content.map((c) => c).join("");
+      }
+      else {
+        return responseOutput[0].content;
+      }
     }
-    else {
-      return shardTitleOutput[0].content;
-    }
-   }
 
-   const generateResponse = () => {
-    if(responseOutput[0].type !== "text") {
-      return "Here you go";
-    }
-    if(Array.isArray(responseOutput[0].content)) {
-      return responseOutput[0].content.map((c) => c).join("");
-    }
-    else {
-      return responseOutput[0].content;
-    }
-   }
-
-   const isError = !result.state.data.summary ||  Object.keys(result.state.data.files || {}).length === 0;
+    const isError = !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
 
 
-  const sandboxUrl = await step.run("get-sandbox-url", async() => {
-    const sandbox = await Sandbox.connect(sandboxId);
-    const host = sandbox.getHost(3000);
+    const sandboxUrl = await step.run("get-sandbox-url", async () => {
+      const sandbox = await Sandbox.connect(sandboxId);
+      const host = sandbox.getHost(3000);
 
-    return `http://${host}`;
-  })
+      return `http://${host}`;
+    })
 
-  await step.run("save-result", async() => {
-    if(isError) {
+    await step.run("save-result", async () => {
+      if (isError) {
+        return await db.message.create({
+          data: {
+            projectId: event.data.projectId,
+            content: "Something went wrong. Please try again",
+            role: MessageRole.ASSISTANT,
+            type: MessageType.ERROR,
+          }
+        });
+      }
+
       return await db.message.create({
         data: {
           projectId: event.data.projectId,
-          content: "Something went wrong. Please try again",
+          content: result.state.data.summary,
           role: MessageRole.ASSISTANT,
-          type: MessageType.ERROR,
-        }
-      });
-    }
-
-    return await db.message.create({
-      data: {
-        projectId: event.data.projectId,
-        content: result.state.data.summary,
-        role: MessageRole.ASSISTANT,
-        type: MessageType.RESULT,
-        shards: {
-          create: {
-            sandboxUrl: sandboxUrl,
-            title: generateShardTitle(),
-            files: result.state.data.files
+          type: MessageType.RESULT,
+          shards: {
+            create: {
+              sandboxUrl: sandboxUrl,
+              title: generateShardTitle(),
+              files: result.state.data.files
+            }
           }
         }
-      }
+      });
     });
-  });
 
 
 
-  return {
-      url:sandboxUrl,
-      title:"Untitled",
-      files:result.state.data.files,
-      summary:result.state.data.summary
-  }
+    return {
+      url: sandboxUrl,
+      title: "Untitled",
+      files: result.state.data.files,
+      summary: result.state.data.summary
+    }
 
   },
 );

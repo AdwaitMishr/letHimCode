@@ -41,7 +41,27 @@ const ProjectList = () => {
     }
 
     if (!projects || !Array.isArray(projects) || projects.length === 0) {
-        return null;
+        return (
+            <div className="w-full mt-16 px-4">
+                <div className="flex flex-col items-center justify-center gap-4 py-16 max-w-md mx-auto text-center">
+                    <div className="p-4 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        <FolderKanban className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">No projects yet</h3>
+                    <p className="text-sm text-muted-foreground">
+                        Describe your idea above and let the AI cook your first project.
+                    </p>
+                    <a
+                        href="#"
+                        onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm transition-colors"
+                    >
+                        <FlaskConical className="w-4 h-4" />
+                        Create your first project
+                    </a>
+                </div>
+            </div>
+        );
     }
 
     return (
