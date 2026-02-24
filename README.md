@@ -97,6 +97,3 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 └── public/           # Static assets
 ```
 
-## 📄 License
-
-MIT
